@@ -1,0 +1,12 @@
+server-demo/target
+client-demo/target
+
+server-demo/*.iml
+client-demo/*.iml
+
+server-demo/.idea
+client-demo/.idea
+
+.DS_Store
+server-demo/.DS_Store
+server-demo/.DS_Store
