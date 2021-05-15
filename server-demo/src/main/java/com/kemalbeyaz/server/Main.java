@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Main {
 
@@ -15,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Hello from the server side!");
 
-        var threadPoolExecutor = new ThreadPoolExecutor(20, 20, 1, TimeUnit.SECONDS, new LinkedBlockingDeque());
+        var executorService = Executors.newFixedThreadPool(10);
 
         try (var serverSocket = new ServerSocket(9090, 1)) {
 
@@ -26,7 +24,7 @@ public class Main {
 
                 MessageListener messageListener = new MessageListener(socket, messageListeners);
                 messageListeners.add(messageListener);
-                threadPoolExecutor.submit(messageListener);
+                executorService.submit(messageListener);
                 countAliveConnection();
             }
 

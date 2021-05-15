@@ -12,7 +12,6 @@ public class MessageListener implements Runnable {
     private final List<MessageListener> messageListeners;
 
     private boolean isAlive = true;
-    private BufferedWriter writer;
 
     public MessageListener(Socket socket, List<MessageListener> messageListeners) {
         this.socket = socket;
@@ -22,13 +21,13 @@ public class MessageListener implements Runnable {
     @Override
     public void run() {
         try {
-            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()), 10);
+            var writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()), 10);
             var reader = new BufferedReader(new InputStreamReader(socket.getInputStream()), 10);
 
             String message;
             do {
                 message = reader.readLine();
-                sendToOtherClients(message);
+                sendToOtherClients(writer, message);
 
                 System.out.println(message);
             } while (message != null && !message.equals("exit"));
@@ -36,7 +35,7 @@ public class MessageListener implements Runnable {
             this.isAlive = false;
 
             reader.close();
-            this.writer.close();
+            writer.close();
             this.socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -51,16 +50,16 @@ public class MessageListener implements Runnable {
         return id;
     }
 
-    private void sendMessage(String message) {
+    private void sendMessage(BufferedWriter writer, String message) {
         try {
-            this.writer.write(message);
-            this.writer.newLine();
-            this.writer.flush();
+            writer.write(message);
+            writer.newLine();
+            writer.flush();
         } catch (IOException ignored) {
         }
     }
 
-    private void sendToOtherClients(String message) {
+    private void sendToOtherClients(BufferedWriter writer, String message) {
         if (message == null) {
             return;
         }
@@ -68,6 +67,6 @@ public class MessageListener implements Runnable {
         messageListeners.stream()
                 .filter(MessageListener::isAlive)
                 .filter(messageListener -> messageListener.getId() != getId())
-                .forEach(messageListener -> messageListener.sendMessage(message));
+                .forEach(messageListener -> messageListener.sendMessage(writer, message));
     }
 }
