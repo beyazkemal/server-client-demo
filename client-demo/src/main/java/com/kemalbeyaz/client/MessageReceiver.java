@@ -17,9 +17,8 @@ public class MessageReceiver implements Runnable {
     @Override
     public void run() {
         try {
-            String message;
             do {
-                message = reader.readLine();
+                var message = reader.readLine();
                 System.out.println(">> " + message);
             } while (!isExit.get());
 

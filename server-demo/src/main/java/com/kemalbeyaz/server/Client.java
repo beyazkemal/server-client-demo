@@ -5,17 +5,16 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Random;
 
-public class MessageListener implements Runnable {
+public class Client implements Runnable {
 
     private final int id = new Random().nextInt();
+
     private final Socket socket;
-    private final List<MessageListener> messageListeners;
+    private final List<Client> clients;
 
-    private boolean isAlive = true;
-
-    public MessageListener(Socket socket, List<MessageListener> messageListeners) {
+    public Client(Socket socket, List<Client> clients) {
         this.socket = socket;
-        this.messageListeners = messageListeners;
+        this.clients = clients;
     }
 
     @Override
@@ -32,18 +31,13 @@ public class MessageListener implements Runnable {
                 System.out.println(message);
             } while (message != null && !message.equals("exit"));
 
-            this.isAlive = false;
-
             reader.close();
             writer.close();
             this.socket.close();
+            this.clients.removeIf(m -> m.getId() == getId());
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public boolean isAlive() {
-        return isAlive;
     }
 
     private int getId() {
@@ -64,9 +58,8 @@ public class MessageListener implements Runnable {
             return;
         }
 
-        messageListeners.stream()
-                .filter(MessageListener::isAlive)
-                .filter(messageListener -> messageListener.getId() != getId())
-                .forEach(messageListener -> messageListener.sendMessage(writer, message));
+        clients.stream()
+                .filter(client -> client.getId() != getId())
+                .forEach(client -> client.sendMessage(writer, message));
     }
 }

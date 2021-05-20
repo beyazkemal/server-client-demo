@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 
 public class Main {
 
-    private static final List<MessageListener> messageListeners = new ArrayList<>();
+    private static final List<Client> CLIENTS = new ArrayList<>();
 
     public static void main(String[] args) {
         System.out.println("Hello from the server side!");
@@ -22,9 +22,9 @@ public class Main {
                 var socket = serverSocket.accept();
                 System.out.println("++ New connection accepted.");
 
-                MessageListener messageListener = new MessageListener(socket, messageListeners);
-                messageListeners.add(messageListener);
-                executorService.submit(messageListener);
+                Client client = new Client(socket, CLIENTS);
+                CLIENTS.add(client);
+                executorService.submit(client);
                 countAliveConnection();
             }
 
@@ -34,7 +34,6 @@ public class Main {
     }
 
     private static void countAliveConnection() {
-        messageListeners.removeIf(messageListener -> !messageListener.isAlive());
-        System.out.println("Active client count: " + messageListeners.size());
+        System.out.println("Active client count: " + CLIENTS.size());
     }
 }
